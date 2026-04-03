@@ -1,0 +1,36 @@
+name: cybersec-openenv
+description: >
+  A cybersecurity incident response environment where agents analyze logs,
+  detect threats, and take actions like flagging, blocking IPs, or escalation.
+version: 1.0
+
+entry_point: env.environment:CyberSecEnv
+
+observation_space:
+  type: object
+  properties:
+    available_tools:
+      type: array
+      items:
+        type: string
+    history:
+      type: array
+      items:
+        type: object
+
+action_space:
+  type: string
+  description: Tool-based actions executed via environment methods
+  enum:
+    - scan_log
+    - flag_alert
+    - block_ip
+    - escalate_case
+
+reward_range: [-2, 2]
+
+tags:
+  - cybersecurity
+  - multi-step
+  - reasoning
+  - tool-use
