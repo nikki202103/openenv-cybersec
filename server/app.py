@@ -1,4 +1,5 @@
 import gradio as gr
+from inference import app
 from baseline.run_agent import run_simulation
 
 def run():
