@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from env.environment import CyberSecEnv
 
 app = FastAPI()
+
 env = CyberSecEnv()
 
 @app.get("/")
@@ -10,7 +11,13 @@ def home():
 
 @app.post("/reset")
 def reset():
-    return {"observation": env.reset()}
+    obs = env.reset()
+    return {
+        "observation": {
+            "available_tools": obs["available_tools"],
+            "history": obs["history"]
+        }
+    }
 
 @app.post("/step")
 def step(action: str):
