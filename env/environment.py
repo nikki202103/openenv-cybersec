@@ -26,7 +26,12 @@ class CyberSecEnv:
         self.history = []
         self.last_action = None
         return {
-        "available_tools": [...],
+        "available_tools": [
+            "scan_log",
+            "flag_alert",
+            "block_ip",
+            "escalate_case"
+        ],
         "history": []
     }
 
@@ -66,10 +71,12 @@ class CyberSecEnv:
     # STEP
     # -------------------------
     def step(self,action):
+        self.last_action = action
+
         correct = self.task["steps"][self.step_index]["correct"]
 
         reward = compute_reward(
-            self.last_action,
+            action,
             correct,
             self.step_index,
             self.history
@@ -77,7 +84,7 @@ class CyberSecEnv:
 
         self.history.append({
             "log": self.current_log,
-            "action": self.last_action
+            "action": action
         })
 
         self.step_index += 1
