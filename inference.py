@@ -1,25 +1,22 @@
+from fastapi import FastAPI
 from env.environment import CyberSecEnv
 
+app = FastAPI()
 env = CyberSecEnv()
 
-def run():
+@app.post("/reset")
+def reset():
     obs = env.reset()
-    total = 0
+    return {
+        "observation": obs
+    }
 
-    while True:
-        log = env.scan_log()
-
-        if "password" in log:
-            action = "flag_alert"
-        elif "failed login" in log:
-            action = "block_ip"
-        else:
-            action = "escalate_case"
-
-        obs, reward, done, info = env.step(action)
-        total += reward
-
-        if done:
-            break
-
-    return {"final_score": total}
+@app.post("/step")
+def step(action: str):
+    obs, reward, done, info = env.step(action)
+    return {
+        "observation": obs,
+        "reward": float(reward),
+        "done": bool(done),
+        "info": info or {}
+    }
