@@ -25,7 +25,10 @@ class CyberSecEnv:
         self.step_index = 0
         self.history = []
         self.last_action = None
-        return self._get_obs()
+        return {
+        "available_tools": [...],
+        "history": []
+    }
 
     def _get_obs(self):
         step = self.task["steps"][self.step_index]
@@ -62,7 +65,7 @@ class CyberSecEnv:
     # -------------------------
     # STEP
     # -------------------------
-    def step(self):
+    def step(self,action):
         correct = self.task["steps"][self.step_index]["correct"]
 
         reward = compute_reward(
@@ -87,5 +90,5 @@ class CyberSecEnv:
     def state(self):
         return {
             "step_index": self.step_index,
-            "history": self.history
+            "history": self.history 
         }
