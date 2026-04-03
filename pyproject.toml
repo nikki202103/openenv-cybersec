@@ -1,19 +1,12 @@
 [project]
 name = "cybersec-openenv"
 version = "0.1.0"
-description = "Cybersecurity OpenEnv environment"
-authors = [
-    { name = "Adipanwar123" }
-]
+requires-python = ">=3.10"
 dependencies = [
     "fastapi",
     "uvicorn",
-    "openenv>=0.2.0"
+    "openenv==0.1.13"
 ]
 
 [project.scripts]
-server = "inference:app"
-
-[build-system]
-requires = ["setuptools"]
-build-backend = "setuptools.build_meta"
+server = "server.app:app"
