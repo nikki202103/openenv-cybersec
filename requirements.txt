@@ -1,4 +1,4 @@
 gradio
 pydantic
 fastapi
-uvicorn
+uvicorn[standard]
