@@ -25,15 +25,8 @@ class CyberSecEnv:
         self.step_index = 0
         self.history = []
         self.last_action = None
-        return {
-        "available_tools": [
-            "scan_log",
-            "flag_alert",
-            "block_ip",
-            "escalate_case"
-        ],
-        "history": []
-    }
+
+        return self._get_obs()   # 🔥 IMPORTANT
 
     def _get_obs(self):
         step = self.task["steps"][self.step_index]
