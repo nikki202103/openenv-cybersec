@@ -20,14 +20,20 @@ class CyberSecEnv:
         self.current_log = None
         self.last_action = None
 
+    # -------------------------
+    # RESET
+    # -------------------------
     def reset(self):
         self.task = random.choice(tasks)
         self.step_index = 0
         self.history = []
         self.last_action = None
 
-        return self._get_obs()   # 🔥 IMPORTANT
+        return self._get_obs()
 
+    # -------------------------
+    # OBSERVATION
+    # -------------------------
     def _get_obs(self):
         step = self.task["steps"][self.step_index]
         self.current_log = add_noise(step["log"])
@@ -46,10 +52,11 @@ class CyberSecEnv:
     # TOOLS
     # -------------------------
     def scan_log(self):
+        self.last_action = "scan_log"
         return f"LOG: {self.current_log}"
 
     def flag_alert(self):
-        self.last_action = "flag"
+        self.last_action = "flag_alert"
         return "Alert flagged"
 
     def block_ip(self):
@@ -57,14 +64,24 @@ class CyberSecEnv:
         return "IP blocked"
 
     def escalate_case(self):
-        self.last_action = "escalate"
+        self.last_action = "escalate_case"
         return "Case escalated"
 
     # -------------------------
     # STEP
     # -------------------------
-    def step(self,action):
-        self.last_action = action
+    def step(self, action):
+        # 🔥 Execute tool based on action
+        if action == "scan_log":
+            result = self.scan_log()
+        elif action == "flag_alert":
+            result = self.flag_alert()
+        elif action == "block_ip":
+            result = self.block_ip()
+        elif action == "escalate_case":
+            result = self.escalate_case()
+        else:
+            result = "Invalid action"
 
         correct = self.task["steps"][self.step_index]["correct"]
 
@@ -75,11 +92,13 @@ class CyberSecEnv:
             self.history
         )
 
+        # Update history
         self.history.append({
             "log": self.current_log,
             "action": action
         })
 
+        # Move to next step
         self.step_index += 1
         done = self.step_index >= len(self.task["steps"])
 
@@ -87,8 +106,11 @@ class CyberSecEnv:
 
         return obs, reward, done, {"correct": correct}
 
+    # -------------------------
+    # STATE
+    # -------------------------
     def state(self):
         return {
             "step_index": self.step_index,
-            "history": self.history 
+            "history": self.history
         }
