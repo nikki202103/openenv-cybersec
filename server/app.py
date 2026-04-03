@@ -2,6 +2,9 @@ import gradio as gr
 from inference import app
 from baseline.run_agent import run_simulation
 
+def main():
+    return app
+
 def run():
     return run_simulation()
 
@@ -14,3 +17,6 @@ with gr.Blocks(theme=gr.themes.Soft()) as demo:
     btn.click(fn=run, outputs=output)
 
 demo.launch(server_name="0.0.0.0", server_port=7860)
+
+def main():
+    return app
