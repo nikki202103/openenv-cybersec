@@ -4,7 +4,7 @@ description: >
   detect threats, and take actions like flagging, blocking IPs, or escalation.
 version: 1.0
 
-entry_point: env.environment:CyberSecEnv
+entry_point: entry_point: inference
 
 observation_space:
   type: object
