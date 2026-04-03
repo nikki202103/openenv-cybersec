@@ -1,0 +1,15 @@
+[project]
+name = "cybersec-openenv"
+version = "0.1.0"
+description = "Cybersecurity OpenEnv environment"
+authors = [
+    { name = "Adipanwar123" }
+]
+dependencies = [
+    "fastapi",
+    "uvicorn"
+]
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
