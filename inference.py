@@ -4,12 +4,14 @@ from env.environment import CyberSecEnv
 app = FastAPI()
 env = CyberSecEnv()
 
+@app.get("/")
+def home():
+    return {"status": "running"}
+
 @app.post("/reset")
 def reset():
     obs = env.reset()
-    return {
-        "observation": obs
-    }
+    return {"observation": obs}
 
 @app.post("/step")
 def step(action: str):
