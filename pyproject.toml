@@ -7,8 +7,12 @@ authors = [
 ]
 dependencies = [
     "fastapi",
-    "uvicorn"
+    "uvicorn",
+    "openenv>=0.2.0"
 ]
+
+[project.scripts]
+server = "inference:app"
 
 [build-system]
 requires = ["setuptools"]
