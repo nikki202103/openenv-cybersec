@@ -1,16 +1,54 @@
 from fastapi import FastAPI
+from pydantic import BaseModel
 from env.environment import CyberSecEnv
 
 app = FastAPI()
 
+env = CyberSecEnv()
 
-# ✅ Root route (fixes "Not Found")
+
+# ✅ Root route
 @app.get("/")
 def home():
     return {"status": "running"}
 
 
-# ✅ Your action logic
+# ✅ RESET ENDPOINT (VERY IMPORTANT)
+@app.post("/reset")
+def reset():
+    obs = env.reset()
+    return {
+        "observation": {
+            "available_tools": obs["available_tools"],
+            "history": obs["history"]
+        }
+    }
+
+
+# ✅ STEP ENDPOINT (VERY IMPORTANT)
+class ActionInput(BaseModel):
+    action: str
+
+
+@app.post("/step")
+def step(input: ActionInput):
+    obs, reward, done, info = env.step(input.action)
+
+    return {
+        "observation": {
+            "available_tools": obs["available_tools"],
+            "history": obs["history"]
+        },
+        "reward": float(reward),
+        "done": bool(done),
+        "info": info or {}
+    }
+
+
+# =========================
+# ✅ VALIDATION PART (DO NOT REMOVE)
+# =========================
+
 def choose_action(obs):
     tools = obs["available_tools"]
 
@@ -24,11 +62,10 @@ def choose_action(obs):
         return "escalate_case"
 
 
-# ✅ REQUIRED main() for validator
 def main():
-    env = CyberSecEnv()
+    env_local = CyberSecEnv()
 
-    obs = env.reset()
+    obs = env_local.reset()
 
     total_reward = 0
     step_count = 0
@@ -39,7 +76,7 @@ def main():
     while not done:
         action = choose_action(obs)
 
-        obs, reward, done, info = env.step(action)
+        obs, reward, done, info = env_local.step(action)
 
         step_count += 1
         total_reward += reward
@@ -51,6 +88,5 @@ def main():
     print(f"[END] task=cybersec score={score} steps={step_count}", flush=True)
 
 
-# ✅ IMPORTANT (must be present)
 if __name__ == "__main__":
     main()
