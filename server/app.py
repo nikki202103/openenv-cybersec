@@ -1,22 +1,40 @@
-import gradio as gr
-from inference import app
-from baseline.run_agent import run_simulation
+from env.environment import CyberSecEnv
+
 
 def main():
-    return app
+    env = CyberSecEnv()
 
-def run():
-    return run_simulation()
+    obs = env.reset()
 
-with gr.Blocks(theme=gr.themes.Soft()) as demo:
-    gr.Markdown("# 🛡️ CyberSec AI Agent Dashboard")
+    total_reward = 0
+    step_count = 0
 
-    output = gr.Textbox(label="Logs", lines=25)
+    print("[START] task=cybersec", flush=True)
 
-    btn = gr.Button("Run Simulation")
-    btn.click(fn=run, outputs=output)
+    done = False
+    while not done:
+        tools = obs["available_tools"]
 
-demo.launch(server_name="0.0.0.0", server_port=7860)
+        if "scan_log" in tools:
+            action = "scan_log"
+        elif "flag_alert" in tools:
+            action = "flag_alert"
+        elif "block_ip" in tools:
+            action = "block_ip"
+        else:
+            action = "escalate_case"
 
-def main():
-    return app
+        obs, reward, done, info = env.step(action)
+
+        step_count += 1
+        total_reward += reward
+
+        print(f"[STEP] step={step_count} reward={reward}", flush=True)
+
+    score = total_reward / step_count if step_count > 0 else 0
+
+    print(f"[END] task=cybersec score={score} steps={step_count}", flush=True)
+
+
+if __name__ == "__main__":
+    main()
