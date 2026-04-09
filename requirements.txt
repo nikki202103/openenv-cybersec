@@ -2,3 +2,4 @@ gradio
 pydantic
 fastapi
 uvicorn[standard]
+openai

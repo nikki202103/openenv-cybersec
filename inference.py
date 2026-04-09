@@ -1,19 +1,30 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from env.environment import CyberSecEnv
+import os
+from openai import OpenAI
 
+# =========================
+# ✅ LLM CLIENT (IMPORTANT FIX)
+# =========================
+client = OpenAI(
+    base_url=os.getenv("API_BASE_URL", "https://api.openai.com/v1"),
+    api_key=os.getenv("API_KEY", "")
+)
+
+# =========================
+# ✅ FASTAPI APP
+# =========================
 app = FastAPI()
 
 env = CyberSecEnv()
 
 
-# ✅ Root route
 @app.get("/")
 def home():
     return {"status": "running"}
 
 
-# ✅ RESET ENDPOINT (VERY IMPORTANT)
 @app.post("/reset")
 def reset():
     obs = env.reset()
@@ -25,7 +36,6 @@ def reset():
     }
 
 
-# ✅ STEP ENDPOINT (VERY IMPORTANT)
 class ActionInput(BaseModel):
     action: str
 
@@ -46,22 +56,33 @@ def step(input: ActionInput):
 
 
 # =========================
-# ✅ VALIDATION PART (DO NOT REMOVE)
+# ✅ LLM DECISION FUNCTION (MANDATORY FOR PHASE 2)
 # =========================
-
 def choose_action(obs):
-    tools = obs["available_tools"]
+    prompt = f"""
+    You are a cybersecurity agent.
+    Available tools: {obs['available_tools']}
+    History: {obs['history']}
+    Choose ONE action from available tools.
+    Return ONLY the action name.
+    """
 
-    if "scan_log" in tools:
-        return "scan_log"
-    elif "flag_alert" in tools:
-        return "flag_alert"
-    elif "block_ip" in tools:
-        return "block_ip"
-    else:
-        return "escalate_case"
+    response = client.chat.completions.create(
+        model="gpt-4o-mini",
+        messages=[{"role": "user", "content": prompt}]
+    )
+
+    action = response.choices[0].message.content.strip()
+
+    if action not in obs["available_tools"]:
+        return obs["available_tools"][0]
+
+    return action
 
 
+# =========================
+# ✅ VALIDATION LOOP (DO NOT REMOVE)
+# =========================
 def main():
     env_local = CyberSecEnv()
 
