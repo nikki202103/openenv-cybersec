@@ -5,7 +5,7 @@ import os
 from openai import OpenAI
 
 # =========================
-# ✅ LLM CLIENT (IMPORTANT FIX)
+# ✅ LLM CLIENT (SAFE INIT)
 # =========================
 client = OpenAI(
     base_url=os.getenv("API_BASE_URL", "https://api.openai.com/v1"),
@@ -56,28 +56,37 @@ def step(input: ActionInput):
 
 
 # =========================
-# ✅ LLM DECISION FUNCTION (MANDATORY FOR PHASE 2)
+# ✅ SAFE LLM DECISION FUNCTION (FIXED)
 # =========================
 def choose_action(obs):
-    prompt = f"""
-    You are a cybersecurity agent.
-    Available tools: {obs['available_tools']}
-    History: {obs['history']}
-    Choose ONE action from available tools.
-    Return ONLY the action name.
-    """
+    try:
+        prompt = f"""
+        You are a cybersecurity agent.
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[{"role": "user", "content": prompt}]
-    )
+        Available tools: {obs['available_tools']}
+        History: {obs['history']}
 
-    action = response.choices[0].message.content.strip()
+        Choose ONE action from available tools.
+        Return ONLY the action name.
+        """
 
-    if action not in obs["available_tools"]:
+        response = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}]
+        )
+
+        # SAFE extraction
+        action = response.choices[0].message.content.strip()
+
+        # fallback if invalid
+        if not action or action not in obs["available_tools"]:
+            return obs["available_tools"][0]
+
+        return action
+
+    except Exception:
+        # 🔥 CRITICAL: NEVER CRASH
         return obs["available_tools"][0]
-
-    return action
 
 
 # =========================
