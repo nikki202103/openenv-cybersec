@@ -3,7 +3,7 @@ def compute_reward(action, correct, step_index, history):
 
     if action == correct:
         reward += 1.0
-    elif action in ["flag", "escalate"]:
+    elif action in ["flag_alert", "escalate_case"]:
         reward += 0.5
     else:
         reward -= 1.0
@@ -59,3 +59,12 @@ def grade(state=None, trajectory=None, *args, **kwargs):
         return float(score)
     except Exception:
         return 0.5
+
+def grade_t1(state=None, trajectory=None, *args, **kwargs):
+    return grade(state, trajectory, *args, **kwargs)
+
+def grade_t2(state=None, trajectory=None, *args, **kwargs):
+    return grade(state, trajectory, *args, **kwargs)
+
+def grade_t3(state=None, trajectory=None, *args, **kwargs):
+    return grade(state, trajectory, *args, **kwargs)

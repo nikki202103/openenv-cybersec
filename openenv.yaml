@@ -30,12 +30,12 @@ reward_range: [-2, 2]
 tasks:
 - id: t1
   description: detect threats
-  grader: "env.grader:grade"
+  grader: "env.grader:grade_t1"
 
 - id: t2
   description: flag alerts
-  grader: "env.grader:grade"
+  grader: "env.grader:grade_t2"
 
 - id: t3
   description: block ip
-  grader: "env.grader:grade"
+  grader: "env.grader:grade_t3"
