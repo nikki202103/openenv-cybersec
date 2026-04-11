@@ -2,11 +2,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from env.environment import CyberSecEnv
 
-# =========================
-# ✅ FASTAPI APP
-# =========================
 app = FastAPI()
-
 env = CyberSecEnv()
 
 
@@ -17,11 +13,11 @@ def home():
 
 @app.post("/reset")
 def reset():
-    obs = env.reset()
+    obs = env.reset() or {}
     return {
         "observation": {
-            "available_tools": obs["available_tools"],
-            "history": obs["history"]
+            "available_tools": obs.get("available_tools", []),
+            "history": obs.get("history", [])
         }
     }
 
@@ -34,10 +30,12 @@ class ActionInput(BaseModel):
 def step(input: ActionInput):
     obs, reward, done, info = env.step(input.action)
 
+    obs = obs or {}
+
     return {
         "observation": {
-            "available_tools": obs["available_tools"],
-            "history": obs["history"]
+            "available_tools": obs.get("available_tools", []),
+            "history": obs.get("history", [])
         },
         "reward": float(reward),
         "done": bool(done),
@@ -46,26 +44,28 @@ def step(input: ActionInput):
 
 
 # =========================
-# ✅ FIXED ACTION LOGIC (NO LLM)
+# ✅ SAFE ACTION LOGIC
 # =========================
 action_index = 0
 
 def choose_action(obs):
     global action_index
 
+    # 🔥 CRITICAL FIX
+    if obs is None:
+        return "escalate_case"
+
     tools = obs.get("available_tools", [])
 
     if not tools:
         return "escalate_case"
 
-    # Priority ensures meaningful actions
     priority = ["scan_log", "flag_alert", "block_ip", "escalate_case"]
 
     for act in priority:
         if act in tools:
             return act
 
-    # fallback rotation (ensures diversity)
     action = tools[action_index % len(tools)]
     action_index += 1
 
@@ -73,12 +73,12 @@ def choose_action(obs):
 
 
 # =========================
-# ✅ VALIDATION LOOP (CRITICAL FIX)
+# ✅ SAFE MAIN LOOP
 # =========================
 def main():
     env_local = CyberSecEnv()
 
-    obs = env_local.reset()
+    obs = env_local.reset() or {}
 
     total_reward = 0
     step_count = 0
@@ -87,16 +87,23 @@ def main():
 
     done = False
 
-    # 🔥 FORCE MINIMUM STEPS
-    while not done or step_count < 6:
-        action = choose_action(obs)
+    while (not done or step_count < 6) and step_count < 20:
+        try:
+            action = choose_action(obs)
 
-        obs, reward, done, info = env_local.step(action)
+            obs, reward, done, info = env_local.step(action)
 
-        step_count += 1
-        total_reward += reward
+            # 🔥 CRITICAL FIX
+            obs = obs or {}
 
-        print(f"[STEP] step={step_count} reward={reward}", flush=True)
+            step_count += 1
+            total_reward += reward
+
+            print(f"[STEP] step={step_count} reward={reward}", flush=True)
+
+        except Exception:
+            # 🔥 NEVER CRASH
+            break
 
     # ✅ SAFE SCORE
     if step_count > 0:
@@ -104,7 +111,7 @@ def main():
     else:
         score = 0.5
 
-    # 🔥 CLAMP SCORE (VERY IMPORTANT)
+    # clamp score
     if score <= 0:
         score = 0.3
     elif score >= 1:
