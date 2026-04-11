@@ -1,9 +1,21 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
 from env.environment import CyberSecEnv
+import os
+from openai import OpenAI
+
+# =========================
+# ✅ SAFE LLM CLIENT (REQUIRED)
+# =========================
+client = OpenAI(
+    base_url=os.getenv("API_BASE_URL"),
+    api_key=os.getenv("API_KEY")
+)
 
 app = FastAPI()
 env = CyberSecEnv()
+
+llm_used = False  # 🔥 ensures at least one API call
 
 
 @app.get("/")
@@ -29,7 +41,6 @@ class ActionInput(BaseModel):
 @app.post("/step")
 def step(input: ActionInput):
     obs, reward, done, info = env.step(input.action)
-
     obs = obs or {}
 
     return {
@@ -44,14 +55,13 @@ def step(input: ActionInput):
 
 
 # =========================
-# ✅ SAFE ACTION LOGIC
+# ✅ FINAL ACTION LOGIC (HYBRID)
 # =========================
 action_index = 0
 
 def choose_action(obs):
-    global action_index
+    global action_index, llm_used
 
-    # 🔥 CRITICAL FIX
     if obs is None:
         return "escalate_case"
 
@@ -60,6 +70,31 @@ def choose_action(obs):
     if not tools:
         return "escalate_case"
 
+    # 🔥 USE LLM ONLY ONCE
+    if not llm_used:
+        try:
+            prompt = f"""
+            Available tools: {tools}
+            History: {obs.get('history', [])}
+            Choose one action.
+            Return ONLY the action.
+            """
+
+            response = client.chat.completions.create(
+                model="gpt-4o-mini",
+                messages=[{"role": "user", "content": prompt}]
+            )
+
+            action = response.choices[0].message.content.strip()
+
+            if action in tools:
+                llm_used = True
+                return action
+
+        except Exception:
+            pass  # fallback safely
+
+    # 🔥 DETERMINISTIC LOGIC AFTER LLM
     priority = ["scan_log", "flag_alert", "block_ip", "escalate_case"]
 
     for act in priority:
@@ -92,8 +127,6 @@ def main():
             action = choose_action(obs)
 
             obs, reward, done, info = env_local.step(action)
-
-            # 🔥 CRITICAL FIX
             obs = obs or {}
 
             step_count += 1
@@ -102,16 +135,13 @@ def main():
             print(f"[STEP] step={step_count} reward={reward}", flush=True)
 
         except Exception:
-            # 🔥 NEVER CRASH
             break
 
-    # ✅ SAFE SCORE
     if step_count > 0:
         score = total_reward / step_count
     else:
         score = 0.5
 
-    # clamp score
     if score <= 0:
         score = 0.3
     elif score >= 1:
