@@ -28,17 +28,14 @@ reward_range: [-2, 2]
 
 # 🔥 REAL FIX
 tasks:
-  - id: t1
-    name: detect threats
-    description: detect malicious logs
-    grader: "env.environment:CyberSecEnv"
+- id: t1
+  description: detect threats
+  grader: "env.grader:grade"
 
-  - id: t2
-    name: flag alerts
-    description: flag suspicious activity
-    grader: "env.environment:CyberSecEnv"
+- id: t2
+  description: flag alerts
+  grader: "env.grader:grade"
 
-  - id: t3
-    name: block ip
-    description: block malicious ip
-    grader: "env.environment:CyberSecEnv"
+- id: t3
+  description: block ip
+  grader: "env.grader:grade"
