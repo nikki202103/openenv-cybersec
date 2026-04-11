@@ -2,20 +2,31 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 from env.environment import CyberSecEnv
 import os
-from openai import OpenAI
 
 # =========================
-# ✅ SAFE LLM CLIENT (REQUIRED)
+# ✅ SAFE LLM INIT (NO CRASH)
 # =========================
-client = OpenAI(
-    base_url=os.getenv("API_BASE_URL"),
-    api_key=os.getenv("API_KEY")
-)
+client = None
+
+try:
+    from openai import OpenAI
+
+    api_key = os.getenv("API_KEY")
+    base_url = os.getenv("API_BASE_URL")
+
+    if api_key and base_url:
+        client = OpenAI(
+            base_url=base_url,
+            api_key=api_key
+        )
+except:
+    client = None
+
 
 app = FastAPI()
 env = CyberSecEnv()
 
-llm_used = False  # 🔥 ensures at least one API call
+llm_used = False
 
 
 @app.get("/")
@@ -55,12 +66,12 @@ def step(input: ActionInput):
 
 
 # =========================
-# ✅ FINAL ACTION LOGIC (HYBRID)
+# ✅ HYBRID ACTION LOGIC
 # =========================
 action_index = 0
 
 def choose_action(obs):
-    global action_index, llm_used
+    global action_index, llm_used, client
 
     if obs is None:
         return "escalate_case"
@@ -70,8 +81,8 @@ def choose_action(obs):
     if not tools:
         return "escalate_case"
 
-    # 🔥 USE LLM ONLY ONCE
-    if not llm_used:
+    # 🔥 TRY LLM ONLY IF AVAILABLE
+    if client is not None and not llm_used:
         try:
             prompt = f"""
             Available tools: {tools}
@@ -94,7 +105,7 @@ def choose_action(obs):
         except Exception:
             pass  # fallback safely
 
-    # 🔥 DETERMINISTIC LOGIC AFTER LLM
+    # 🔥 DETERMINISTIC FALLBACK
     priority = ["scan_log", "flag_alert", "block_ip", "escalate_case"]
 
     for act in priority:
