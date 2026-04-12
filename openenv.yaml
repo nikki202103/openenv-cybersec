@@ -2,7 +2,7 @@ name: cybersec-openenv
 description: Cybersecurity environment
 version: "1.0"
 
-entry_point: simulator.environment:CyberSecEnv
+entry_point: env.environment:CyberSecEnv
 
 observation_space:
   type: object
@@ -32,34 +32,34 @@ tasks:
   name: "Task 1"
   description: "detect threats"
   max_steps: 10
-  grader: "grader:grade_t1"
+  grader: "env.grader:grade_t1"
 
 - id: "t2"
   name: "Task 2"
   description: "flag alerts"
   max_steps: 10
-  grader: "grader:grade_t2"
+  grader: "env.grader:grade_t2"
 
 - id: "t3"
   name: "Task 3"
   description: "block ip"
   max_steps: 10
-  grader: "grader:grade_t3"
+  grader: "env.grader:grade_t3"
 
 - id: "t4"
   name: "Task 4"
   description: "malware execution"
   max_steps: 10
-  grader: "grader:grade_t4"
+  grader: "env.grader:grade_t4"
 
 - id: "t5"
   name: "Task 5"
   description: "c2 communication"
   max_steps: 10
-  grader: "grader:grade_t5"
+  grader: "env.grader:grade_t5"
 
 - id: "t6"
   name: "Task 6"
   description: "data exfiltration"
   max_steps: 10
-  grader: "grader:grade_t6"
+  grader: "env.grader:grade_t6"

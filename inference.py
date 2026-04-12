@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from pydantic import BaseModel
-from simulator.environment import CyberSecEnv
+from env.environment import CyberSecEnv
 import os
 
 # =========================

@@ -4,7 +4,7 @@ import os
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
 
 import gradio as gr
-from simulator.environment import CyberSecEnv
+from env.environment import CyberSecEnv
 
 
 def run_agent():
