@@ -122,43 +122,46 @@ def choose_action(obs):
 # ✅ SAFE MAIN LOOP
 # =========================
 def main():
-    env_local = CyberSecEnv()
+    # Evaluate 6 times to ensure we cover enough tasks
+    for i in range(6):
+        env_local = CyberSecEnv()
+        obs = env_local.reset() or {}
+        
+        task_id = env_local.task["id"]
 
-    obs = env_local.reset() or {}
+        total_reward = 0
+        step_count = 0
 
-    total_reward = 0
-    step_count = 0
+        print(f"[START] task={task_id}", flush=True)
 
-    print("[START] task=cybersec", flush=True)
+        done = False
 
-    done = False
+        while (not done or step_count < 6) and step_count < 20:
+            try:
+                action = choose_action(obs)
 
-    while (not done or step_count < 6) and step_count < 20:
-        try:
-            action = choose_action(obs)
+                obs, reward, done, info = env_local.step(action)
+                obs = obs or {}
 
-            obs, reward, done, info = env_local.step(action)
-            obs = obs or {}
+                step_count += 1
+                total_reward += reward
 
-            step_count += 1
-            total_reward += reward
+                print(f"[STEP] step={step_count} reward={reward}", flush=True)
 
-            print(f"[STEP] step={step_count} reward={reward}", flush=True)
+            except Exception:
+                break
 
-        except Exception:
-            break
+        if step_count > 0:
+            score = total_reward / step_count
+        else:
+            score = 0.5
 
-    if step_count > 0:
-        score = total_reward / step_count
-    else:
-        score = 0.5
+        if score <= 0:
+            score = 0.3
+        elif score >= 1:
+            score = 0.9
 
-    if score <= 0:
-        score = 0.3
-    elif score >= 1:
-        score = 0.9
-
-    print(f"[END] task=cybersec score={score} steps={step_count}", flush=True)
+        print(f"[END] task={task_id} score={score} steps={step_count}", flush=True)
 
 
 if __name__ == "__main__":
