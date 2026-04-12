@@ -1,6 +1,6 @@
 import random
-from env.tasks import tasks
-from env.grader import compute_reward
+from simulator.tasks import tasks
+from simulator.grader import compute_reward
 
 # -----------------------------
 # PARTIAL OBSERVABILITY

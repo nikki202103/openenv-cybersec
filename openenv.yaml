@@ -2,7 +2,7 @@ name: cybersec-openenv
 description: Cybersecurity environment
 version: "1.0"
 
-entry_point: env.environment:CyberSecEnv
+entry_point: simulator.environment:CyberSecEnv
 
 observation_space:
   type: object
@@ -32,16 +32,16 @@ tasks:
   name: Task 1
   description: detect threats
   difficulty: easy
-  grader: "env.grader:grade_t1"
+  grader: "simulator.grader:grade_t1"
 
 - id: t2
   name: Task 2
   description: flag alerts
   difficulty: medium
-  grader: "env.grader:grade_t2"
+  grader: "simulator.grader:grade_t2"
 
 - id: t3
   name: Task 3
   description: block ip
   difficulty: hard
-  grader: "env.grader:grade_t3"
+  grader: "simulator.grader:grade_t3"

@@ -1,4 +1,4 @@
-from env.environment import CyberSecEnv
+from simulator.environment import CyberSecEnv
 
 
 def main():
