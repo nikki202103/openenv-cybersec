@@ -67,4 +67,13 @@ def grade_t2(state=None, trajectory=None, *args, **kwargs):
     return grade(state, trajectory, *args, **kwargs)
 
 def grade_t3(state=None, trajectory=None, *args, **kwargs):
+    return grade(state, trajectory, *args, **kwargs)
+
+def grade_t4(state=None, trajectory=None, *args, **kwargs):
+    return grade(state, trajectory, *args, **kwargs)
+
+def grade_t5(state=None, trajectory=None, *args, **kwargs):
+    return grade(state, trajectory, *args, **kwargs)
+
+def grade_t6(state=None, trajectory=None, *args, **kwargs):
     return grade(state, trajectory, *args, **kwargs)

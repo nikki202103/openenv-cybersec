@@ -44,4 +44,22 @@ tasks:
   name: Task 3
   description: block ip
   difficulty: hard
-  grader: "simulator.grader:grade_t3"
+  grader: "simulator.grader:grade_t3"
+
+- id: t4
+  name: Task 4
+  description: malware execution
+  difficulty: easy
+  grader: "simulator.grader:grade_t4"
+
+- id: t5
+  name: Task 5
+  description: c2 communication
+  difficulty: medium
+  grader: "simulator.grader:grade_t5"
+
+- id: t6
+  name: Task 6
+  description: data exfiltration
+  difficulty: hard
+  grader: "simulator.grader:grade_t6"
